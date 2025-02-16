@@ -1,19 +1,29 @@
 import tensorflow as tf
-from .data_loader import prepare_food101
+from .data_loader import prepare_food11
 from .model import create_model
 
-def train_model(num_classes=10, epochs=5):
-    # 데이터 로드
-    train_ds, test_ds, dataset_info = prepare_food101(num_classes=num_classes)
+def train_model(epochs=10):
+    # 데이터 준비
+    train_ds, val_ds, class_names = prepare_food11()
     
     # 모델 생성
-    model = create_model(num_classes=num_classes)
+    model = create_model()
+    
+    # 콜백 설정
+    callbacks = [
+        tf.keras.callbacks.EarlyStopping(
+            monitor='val_accuracy',
+            patience=3,
+            restore_best_weights=True
+        )
+    ]
     
     # 모델 학습
     history = model.fit(
         train_ds,
-        validation_data=test_ds,
-        epochs=epochs
+        validation_data=val_ds,
+        epochs=epochs,
+        callbacks=callbacks
     )
     
-    return model, history, dataset_info
+    return model, history, class_names
