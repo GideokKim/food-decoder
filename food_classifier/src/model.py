@@ -1,28 +1,22 @@
 import tensorflow as tf
 
-def create_model():
-    # ResNet50 베이스 모델 로드
-    base_model = tf.keras.applications.ResNet50(
-        weights='imagenet',
-        include_top=False,
-        input_shape=(224, 224, 3)
-    )
-    
-    # 베이스 모델 동결
-    base_model.trainable = False
-    
-    # 새로운 분류 레이어 추가
+def create_model(num_classes=10):
     model = tf.keras.Sequential([
-        base_model,
-        tf.keras.layers.GlobalAveragePooling2D(),
-        tf.keras.layers.Dense(256, activation='relu'),
-        tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(101, activation='softmax')
+        # 더 작은 CNN 모델
+        tf.keras.layers.Conv2D(32, 3, activation='relu', input_shape=(128, 128, 3)),
+        tf.keras.layers.MaxPooling2D(),
+        tf.keras.layers.Conv2D(64, 3, activation='relu'),
+        tf.keras.layers.MaxPooling2D(),
+        tf.keras.layers.Conv2D(64, 3, activation='relu'),
+        tf.keras.layers.MaxPooling2D(),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(64, activation='relu'),
+        tf.keras.layers.Dense(num_classes, activation='softmax')
     ])
     
     model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
-        loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+        optimizer='adam',
+        loss='sparse_categorical_crossentropy',
         metrics=['accuracy']
     )
     
